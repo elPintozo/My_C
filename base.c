@@ -1,7 +1,133 @@
+/*esta forma de import, es para indicar que vaya a buscar en 
+encabezados de la biblioteca estandar*/
 #include <stdio.h>
 
-/*Comentarios*/
+/*Para importar un archivo dentro del mismo directorio*/
+//#include "nombre_archivo"
+
+/*Pra declarar una constante inmutable(no cambia de valor)*/
+#define PI 3.14159 //float
+
+/*Para declarar una macro*/
+#define CUBO(a) a*a*a
+
+/*C posee 32 palabras reservadas, las cuales no pueden ser usadas
+para declarar una variable
+
+char
+int
+float
+double
+long
+short
+signed
+unsigned
+void
+if
+else
+do
+while
+for
+switch
+case
+default
+break
+continue
+goto
+struct
+union
+enum
+typedef
+return
+auto
+extern
+register
+const
+static
+volatile
+sizeof
+
+*/
+
+/*Asi se hace un comentario
+de varios parrafos*/
+
+//Un comentario breve
+
 int main(){
+	/*Operadores Logicos
+
+	Operadores de igualdad
+	==
+	!=
+
+	Operadores de relacion
+	>
+	<
+	>=
+	<=
+
+	if(condicion){
+	
+	}
+	else if (condicion){
+	
+	}
+	else{
+	
+	}
+
+	*/
+	/*Ciclo for*/
+	int contador;
+	for( contador = 1 ; contador <= 10 ; contador++ ){
+		printf("El pivote del for va en %i\n", contador);
+	}
+	printf("\n");
+	/*Ciclo while*/
+	int contador2;
+	while(contador2<=10){
+		printf("El pivote del while va en %i\n", contador2);
+		contador2++;	
+	}
+	printf("\n");
+	/*Ciclo do while*/
+	int contador3=1;
+	do{
+		printf("El pivote del do while va en %i\n", contador3);
+		contador3++;
+	}while(contador3<=10);
+	printf("\n");
+	/*Switch*/
+	int casos;
+	printf("Ingresa un caso: ");
+	scanf("%i", &casos);
+
+	switch(casos){
+		/*case int or case 'char'*/
+		case 1:
+			printf("Caso 1\n");
+			break;
+		case 2:
+			printf("Caso 2\n");
+			break;
+		case 3:
+			printf("Caso 3\n");
+			break;
+		case 4:
+			printf("Caso 4\n");
+			break;
+		case 5:
+			printf("Caso 5\n");
+			break;
+
+		default:
+		printf("Opcion no valida\n");
+		break;
+	}
+	
+	printf("\nEL valor de pi es %f \n",PI);//variable de tipo float
+	printf("El cubo de 2 es %i\n",CUBO(2));
 
 	return 0;
 } /*Fin funcion main*/

@@ -129,5 +129,14 @@ int main(){
 	printf("\nEL valor de pi es %f \n",PI);//variable de tipo float
 	printf("El cubo de 2 es %i\n",CUBO(2));
 
+	/*Direcciones de memoria*/
+	int var = 5;
+	int *apt = &var;
+	printf("\nEL valor que aloja la direccion(%p) de memoria es %i\n", apt,*apt);
+
+	/*Operador SIZEOF*/
+	float array[20];
+	printf("\nEl numero de bytes en el arreglo es de %lu \n", sizeof(array));//lu = long unsigned
+	
 	return 0;
 } /*Fin funcion main*/

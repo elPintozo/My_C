@@ -1,0 +1,4 @@
+casa
+casco
+lago
+auto

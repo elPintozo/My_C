@@ -3,7 +3,7 @@
 
 /*Funcion que genera una matriz llenada con -
 entradas:
--dimension: valor del numero de filas y columnas
+-dimension: valor que usa para el numero de filas y columnas, es el mismo en ambos
 salida:
 -char**: una matriz que en cada uno de sus Aij tiene un -
 */
@@ -20,7 +20,13 @@ char** generar_matriz(int dimension){
 
 	return tablero;
 }
-/*Funcion que imprime por terminal la matriz actual*/
+
+/*Funcion que imprime por terminal la matriz actual
+entradas:
+- tablero: una matriz con la informacion de la sopa de letras 
+- largo: dimension del numero de filas o columnas, es el mismo valor para ambas
+salida: void
+*/
 void imprimir_matriz(char** tablero, int largo){
 
 	/*For que nos ayuda a enumerar e imprimir 
@@ -72,8 +78,8 @@ void imprimir_matriz(char** tablero, int largo){
 		}
 		printf("\n");
 	}
-
 }
+
 /*Funcion que  solicita al jugador el largo de la matriz de juego
 entrada: 
 - largo: direccion de memoria
@@ -88,6 +94,12 @@ void solicitar_largo(int *largo){
 	}printf("\n");
 	*largo=dimension;
 }
+
+/*Funcion que solicita el nivel de juego al usuario
+entradass:
+- nivel: direccion de memoria
+salida: void
+*/
 void solicitar_nivel(char *nivel){
 
 	int nivel_seleccionado=0;
@@ -127,29 +139,7 @@ void solicitar_nivel(char *nivel){
 	}
 	*nivel = teclado;
 }
-
-int main()
-{
-	printf("-- Bienvenido --\n\n");
-
-	int largo=0;
-	solicitar_largo(&largo);
-
-	//Declaro la variable del tablero
-	char** tablero;
-
-	//creo la matriz
-	tablero = generar_matriz(largo);
-
-	//imprimo la variable, es opcional
-	//imprimir_matriz(tablero, largo);
-	
-	/*Se solicita el nivel con el que el usuario quiere comenzar a jugar*/
-	char nivel;
-	solicitar_nivel(&nivel);
-	printf("Nivel seleccionado %c\n", nivel);
-
-	/*Se solicita el nombre del archivo de donde se extraeran las palabras*/
+void solicitar_palabras(){
 	FILE *archivo;
 	char ch;
 	char nombre_archivo[1000];
@@ -176,8 +166,37 @@ int main()
 	        existe_archivo=1;
 	    }
 	}
+}
+
+/*Inicio del programa*/
+int main()
+{
+	printf("-- Bienvenido --\n\n");
+
+
+	int largo=0;
+	//solicito al usuario ingresar el largo de matriz de juego
+	solicitar_largo(&largo);
+
+	//Declaro la variable del tablero
+	char** tablero;
+
+	//creo la matriz
+	tablero = generar_matriz(largo);
+
+	//imprimo la variable, es opcional
+	//imprimir_matriz(tablero, largo);
+	
+	/*Se solicita el nivel con el que el usuario quiere comenzar a jugar*/
+	char nivel;
+	solicitar_nivel(&nivel);
+
+	/*Se solicita el nombre del archivo de donde se extraeran las palabras*/
+	solicitar_palabras();
 
 	printf("\nFinalizo el juego\n");
+
+	//Libero la memoria solicitada
 	free(tablero);
 	return 0;
 }

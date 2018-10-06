@@ -139,33 +139,126 @@ void solicitar_nivel(char *nivel){
 	}
 	*nivel = teclado;
 }
-void solicitar_palabras(){
+/*Funcion que agrega una letra a un arreglo que contiene parte de una palabra
+entrada: 
+- palabra: un arreglo que puede o no contener uno o varios caracteres previos
+- letra: char que se agregara al final de la variable anterios
+- largo: la posicion del caracter en la variable palabra*/
+char* agregar_letra_a_palabra(char* palabra, char letra, int largo){
+
+	int nuevo_largo = largo+1;//como la posicion 0 tiene su largo, se desplaza en uno la posicion de inicio
+	char* palabra_nueva = (char*)malloc((nuevo_largo+1)*sizeof(char));
+
+	if(largo>0){
+		int len_actual = (int)palabra[0];//la posicion 0 es el largo de la palabra
+		len_actual = len_actual-48; //Para convetir el c a int debo restarle el ASCII
+		len_actual = len_actual+1;//incremento en uno el largo de la palabra
+		palabra_nueva[0]=len_actual+'0';//almaceno el largo en formato char
+
+		//el arreglo parte de la posicion 1, ya que, en la posicion 0 esta el largo
+		for (int i =1; i < nuevo_largo; i++){
+			palabra_nueva[i]=palabra[i];
+		}
+	}
+	else{
+		palabra_nueva[0]=1+'0';//la palabra parte con largo 1, ya que se agrego el primer caracter
+	}
+	//agrego alfinal el nuevo caracter
+	palabra_nueva[nuevo_largo]=letra;
+	
+	return palabra_nueva;
+}
+
+
+char** agregar_palabra(char** listado, char* palabra, int fila){
+
+	char** nueva_lista = (char**)malloc((fila+1)*sizeof(char*));
+
+	//replico el listado anterior pero con un espacio mas
+	for (int i = 0; i < fila; ++i){
+
+		//obtengo el largo desde la posicion cero del array con la palabra
+		int largo_palabra = (int)listado[i][0]-48 +1;
+		char* palabra_nueva = (char*)malloc((largo_palabra)*sizeof(char));
+		for (int y = 0; y < largo_palabra; y++)
+		{
+			palabra_nueva[y]=listado[i][y];
+		}
+		nueva_lista[i]=palabra_nueva;
+	}
+	
+	//inserto al final del listado la palabra nueva
+	int largo_palabra = (int)palabra[0]-48 +1;
+	char* palabra_nueva = (char*)malloc((largo_palabra)*sizeof(char));
+	for (int i = 0; i < largo_palabra; i++)
+	{
+		palabra_nueva[i]=palabra[i];
+	}
+
+	nueva_lista[fila]=palabra_nueva;
+
+	return nueva_lista;
+}
+
+
+/*Funcion que solicita al usuario el archivo txt con las palabras a poner en la
+sopa de letras.
+entradas:
+-n_palabras: puntero con la variable que contiene la cantidad de palabras del txt
+-maixmo: el maximo de palabras permitidas y el largo maximo de caracteres de cada una
+salida:
+- lista con las palabras*/
+char** solicitar_palabras(int *encontrada,int maximo, int *comenzar){
+
+	char** listado;
 	FILE *archivo;
-	char ch;
+	char letra;
 	char nombre_archivo[1000];
 	int existe_archivo=0;
+
 	while(existe_archivo<=0){
 		printf("Ingresa el nombre del archivo\n(recuerda que el archivo debe \nestar en el mismo directorio,\ndonde esta este programa): ");
 		scanf("%s", nombre_archivo);
 		
 		archivo=fopen(nombre_archivo,"r");
 
+		//Si el archivo presenta errores
 	    if(archivo==NULL){
 	        printf("\nEl nombre esta mal escrito o no se puede abrir, intentalo nuevamente.\n\n");
 	    } 
-	    else{ 
-	    	printf("\nLas palabras contenidas en el archivo '%s' son: \n\n", nombre_archivo);
-	        while((ch=fgetc(archivo))!=EOF){
-	        	if(ch!='\n'){
-        			printf("%c",ch);
+	    else{//de abrir el archivo sin problemas 
+	    	int contador=0;//variable usada para leer las letras dentro de 
+	    	char* palabra;
+
+	        while((letra=fgetc(archivo))!=EOF){
+
+	        	/*Si encuentra un caracter distinot de un salto de linea*/
+	        	if(letra!='\n'){
+
+	        		//mientras el largo de palabra es menor a la permitida se puede crear mas
+	        		if(contador<maximo){
+	        			palabra = agregar_letra_a_palabra(palabra, letra, contador);
+	        			contador++;
+	        		}
+	        		else{
+	        			//su una de las palabras supera el numero permitodo, el juego se termina
+	        			*comenzar=0;
+	        			return listado;
+	        		}
 	        	}else{
-	        		printf(".\n- ");
+	        		listado = agregar_palabra(listado, palabra, *encontrada);
+	        		contador=0;
+	        		*encontrada=*encontrada+1;//actualizo el numero de palabras a buscar
 	        	}
 	            
-	        }printf("\n");
+	        }
+	        listado = agregar_palabra(listado, palabra, *encontrada);//se debe llamar para ingresar la ultima palabra
 	        existe_archivo=1;
 	    }
 	}
+	*encontrada=*encontrada+1;//actualizo el numero de palabras a buscar
+	*comenzar=1;//si todo anda bien comenzar tendra valor 1, de no ser asi tendra un valor distinto
+	return listado;
 }
 
 /*Inicio del programa*/
@@ -173,6 +266,10 @@ int main()
 {
 	printf("-- Bienvenido --\n\n");
 
+	/*Antes de comenzar el juego se deben cargar las palabras,
+	de ocurrir un problema con la carga, esta variable tendra un valor
+	que indicara su por que del no comienzo*/
+	int comenzar;
 
 	int largo=0;
 	//solicito al usuario ingresar el largo de matriz de juego
@@ -192,9 +289,26 @@ int main()
 	solicitar_nivel(&nivel);
 
 	/*Se solicita el nombre del archivo de donde se extraeran las palabras*/
-	solicitar_palabras();
 
-	printf("\nFinalizo el juego\n");
+	/*Se genera un arreglo que contendra las palabras,
+	la cantidad de palabras quedara fijado por el largo menos 1*/
+	char** palabras;
+	int palabras_a_buscar=0;
+	palabras = solicitar_palabras(&palabras_a_buscar, largo-1, &comenzar);
+
+	if(comenzar==0){
+		printf("\nFinalizo el juego\n");
+	}else{
+		printf("\nComencemos, hay %i palabras por encontrar\n", palabras_a_buscar);
+		for (int i = 0; i < palabras_a_buscar; ++i){
+			int largo = (int)palabras[i][0]-48 +1;
+			for (int c =1; c < largo; c++)
+			{
+				printf("%c",palabras[i][c] );
+			}
+			printf("\n");
+		}
+	}
 
 	//Libero la memoria solicitada
 	free(tablero);

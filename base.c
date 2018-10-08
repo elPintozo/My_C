@@ -2,6 +2,7 @@
 encabezados de la biblioteca estandar*/
 #include <stdio.h>
 #include <stdlib.h>//Para usar malloc
+#include <string.h>//Para usar strlen
 /*Para importar un archivo dentro del mismo directorio*/
 //#include "nombre_archivo"
 
@@ -139,13 +140,18 @@ int main(){
 	printf("\nEl numero de bytes en el arreglo es de %lu \n", sizeof(array));//lu = long unsigned
 	
 	/*Asignacion dinamica de memoria*/
-	char *p;
-	p = malloc(10*sizeof(char));
+	char* p;
+	p =(char*)malloc(5*sizeof(char));
 	if (NULL== p){
 		printf("Error al asignar memoria\n");
 	}else{
-		printf("Memoria asignada: %lu -%s-\n", sizeof(*p),p);
+		printf("Memoria asignada: %lu %lu \n", sizeof(p[0]),sizeof(&p));
 	}
+
+	char x1='4';
+	int x2=(int)x1 -48;
+	char x3=x2+'0';
+	printf("%c %i %c\n",x1,x2,x3);
 
 	free(p);//Liberacion de memoria usada y creada de forma dinamica
 	return 0;

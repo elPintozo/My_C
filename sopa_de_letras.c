@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 /*Funcion que genera una matriz llenada con -
 entradas:
@@ -169,7 +170,17 @@ char* agregar_letra_a_palabra(char* palabra, char letra, int largo){
 	return palabra_nueva;
 }
 
-
+/*Funcion que agrega una palabra a un listado en una posicion determinada
+que siempre resulta ser la ultima posicion del listado anterior mas un nuevo
+espacio resevado
+entradas:
+- listado: matriz que contiene las palabras obtenidas del txt
+- palabra: list con la palabra ingresada
+- fila: posicion que indica donde ira la nueva palabra, tambien se usa 
+para saber el contenido de palabras actuales, para realizar una nueva
+lista con mas espacio de memoria
+salida;
+-nueva_lista: lista que contiene las palabaras de listado, mas la palabra a ingresar*/
 char** agregar_palabra(char** listado, char* palabra, int fila){
 
 	char** nueva_lista = (char**)malloc((fila+1)*sizeof(char*));
@@ -199,7 +210,6 @@ char** agregar_palabra(char** listado, char* palabra, int fila){
 
 	return nueva_lista;
 }
-
 
 /*Funcion que solicita al usuario el archivo txt con las palabras a poner en la
 sopa de letras.
@@ -261,6 +271,73 @@ char** solicitar_palabras(int *encontrada,int maximo, int *comenzar){
 	return listado;
 }
 
+/*Funcion que genera un numero aleatorio entre 0 y un numero determinado
+entrada:
+- hasta: el valor maximo que puede tener el numero al azar
+- excluir: lista con las filas o columnas ya ocupadas 
+- n_excluir: numero de elementos dentro de excluir
+salida:
+- mi_random: numero al azar entre 0 y numero de filas/columnas*/
+int numero_random(int hasta, int* excluir, int n_excluir){
+	int mi_random=0, encontrado=0;
+  	time_t t;
+  	/* Intializes random number generator */
+	srand((unsigned) time(&t));
+
+	while(encontrado==0){
+		int pillado=0;
+		mi_random = rand() % hasta;
+		for (int i = 0; i < n_excluir; ++i){
+			if(excluir[i]==mi_random){
+				pillado=1;
+			}
+		}	
+		if(pillado==0){
+			encontrado=1;
+		}
+	}
+	return mi_random;
+}
+/*
+entradas:
+-tablero:
+*/
+void cargar_palabras_al_tablero(char** *tablero, char nivel, char** *palabras, int n_palabras, int filas_columnas){
+	int palabras_insertadas=0;
+	int* reservar=(int*)malloc(n_palabras*sizeof(int));
+	int n_reservar=0;
+
+	//Armo una lista vacia que sera usada pasa saber que filas/columnas ya estan ocupadas
+	//y no pueden ser ocupadas para el random
+	for (int i = 0; i < filas_columnas; i++){
+		reservar[i]=-1;
+	}
+
+	if(nivel=='F'){
+		printf("Palabras de forma horizontal\n");
+		*tablero[0][0]='F';
+		for (int i = 0; i <n_palabras; i++){
+			int posicion = numero_random(filas_columnas, reservar, n_reservar);
+			printf("La palabra %i se alojara en la columna %i \n", i+1, posicion );
+			reservar[i]=posicion;
+			n_reservar=n_reservar+1;
+		}
+	}else if(nivel=='M'){
+		printf("Palabras de forma vertical\n");
+		*tablero[0][0]='M';
+		for (int i = 0; i < n_palabras; i++){
+			int posicion = numero_random(filas_columnas, reservar, n_reservar);
+			printf("La palabra %i se alojara en la fila %i \n", i+1, posicion );
+			reservar[i]=posicion;
+			n_reservar=n_reservar+1;
+		}
+	}else{
+		printf("Palabras en diagonal\n");
+		*tablero[0][0]='A';
+
+	}
+
+}
 /*Inicio del programa*/
 int main()
 {
@@ -320,7 +397,11 @@ int main()
 		}
 		printf("\n");
 	}
-	
+	printf("Antes: \n");
+	imprimir_matriz(tablero, largo);
+	printf("Despues\n");
+	cargar_palabras_al_tablero(&tablero, nivel, &palabras, palabras_a_buscar, largo);
+	imprimir_matriz(tablero, largo);
 
 	//Libero la memoria solicitada
 	free(tablero);

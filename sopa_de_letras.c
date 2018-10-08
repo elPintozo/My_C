@@ -88,8 +88,8 @@ salida: void
 void solicitar_largo(int *largo){
 	/*Se solicita y valida que el largo cumpla con los requisitos del juego*/
 	int dimension=0;
-	while(dimension<4){
-		printf("Ingresa el valor del largo de la sopa de letras,\n(recuerda que debe ser mayor o igual a 4): ");
+	while(dimension<5){
+		printf("Ingresa el valor del largo de la sopa de letras,\n(recuerda que debe ser mayor a 4): ");
 		scanf("%i",&dimension);
 	}printf("\n");
 	*largo=dimension;
@@ -241,7 +241,7 @@ char** solicitar_palabras(int *encontrada,int maximo, int *comenzar){
 	        			contador++;
 	        		}
 	        		else{
-	        			//su una de las palabras supera el numero permitodo, el juego se termina
+	        			//si una de las palabras supera el numero permitodo, el juego se termina
 	        			*comenzar=0;
 	        			return listado;
 	        		}
@@ -253,10 +253,10 @@ char** solicitar_palabras(int *encontrada,int maximo, int *comenzar){
 	            
 	        }
 	        listado = agregar_palabra(listado, palabra, *encontrada);//se debe llamar para ingresar la ultima palabra
-	        existe_archivo=1;
+	        *encontrada=*encontrada+1;//actualizo el numero de palabras a buscar
+	        existe_archivo=1;//cambio el valor de la variable a 1 para cortar el while
 	    }
 	}
-	*encontrada=*encontrada+1;//actualizo el numero de palabras a buscar
 	*comenzar=1;//si todo anda bien comenzar tendra valor 1, de no ser asi tendra un valor distinto
 	return listado;
 }
@@ -294,21 +294,33 @@ int main()
 	la cantidad de palabras quedara fijado por el largo menos 1*/
 	char** palabras;
 	int palabras_a_buscar=0;
-	palabras = solicitar_palabras(&palabras_a_buscar, largo-1, &comenzar);
+	palabras = solicitar_palabras(&palabras_a_buscar, largo, &comenzar);
 
+	//la funcion solicitar_palabras puede modificar el inicio del juego con cambiar 
+	//el valor de la variable comenzar como es este caso 
 	if(comenzar==0){
-		printf("\nFinalizo el juego\n");
-	}else{
-		printf("\nComencemos, hay %i palabras por encontrar\n", palabras_a_buscar);
-		for (int i = 0; i < palabras_a_buscar; ++i){
-			int largo = (int)palabras[i][0]-48 +1;
-			for (int c =1; c < largo; c++)
-			{
-				printf("%c",palabras[i][c] );
-			}
-			printf("\n");
-		}
+		printf("\nUna de de las palabras supera el largo permitido que es : %i \n", largo-1);
+		free(tablero);
+		return 0;
 	}
+	//la funcion solicitar_palabras realiza un conteo de las palabras a buscar
+	//si supera el maximo permitido el juego no podra comenzar
+	if((largo-1)<palabras_a_buscar){
+		printf("\nLa cantidad de palabras es superior a lo permitido que son : %i y hay %i \n", largo-1, palabras_a_buscar);
+		free(tablero);
+		return 0;
+	}
+	
+	printf("\nComencemos, hay %i palabras por encontrar\n", palabras_a_buscar);
+	for (int i = 0; i < palabras_a_buscar; ++i){
+		int largo = (int)palabras[i][0]-48 +1;
+		for (int c =1; c < largo; c++)
+		{
+			printf("%c",palabras[i][c] );
+		}
+		printf("\n");
+	}
+	
 
 	//Libero la memoria solicitada
 	free(tablero);

@@ -278,7 +278,7 @@ entrada:
 - n_excluir: numero de elementos dentro de excluir
 salida:
 - mi_random: numero al azar entre 0 y numero de filas/columnas*/
-int numero_random(int hasta, int* excluir, int n_excluir){
+int fila_columna_random(int hasta, int* excluir, int n_excluir){
 	int mi_random=0, encontrado=0;
   	time_t t;
   	/* Intializes random number generator */
@@ -298,11 +298,74 @@ int numero_random(int hasta, int* excluir, int n_excluir){
 	}
 	return mi_random;
 }
+
+/*Una vez ya determinada la fila/columna destinada a la palabra,
+se debe obtener la posicion inicial de la letra de la palbra,
+se debe evitar que esta comience al final ,ya que podria faltar
+letras de la palabra por aparecer
+entradas:
+- hasta: largo de la fila/columna menos el largo de la palabra
+salidas:
+- mi_random: numero aleatorio dentro del rango [0,hasta]*/
+int posicion_random(int hasta){
+	time_t t;
+  	
+  	/* Intializes random number generator */
+	srand((unsigned) time(&t));
+	int mi_random = rand() % hasta;
+	return mi_random;
+}
+
+/*
+entradas:
+-tablero:
+-palabras:
+-palabra:
+-fila:
+-columna:
+-filas_columnas:
+salidas:
+-tablero:*/
+char** agregar_palabra_en_fila(char** tablero, char** palabras,int palabra, int fila, int columna, int filas_columnas){
+
+	int len_palabra=(int)palabras[palabra][0]-48;
+	int pivote_palabra=1;
+
+	for (int c = columna; c < columna+len_palabra; c++)
+	{
+		tablero[fila][c]=palabras[palabra][pivote_palabra];
+		pivote_palabra=pivote_palabra+1;
+	}
+	return tablero;
+}
+/*
+entradas:
+-tablero:
+-palabras:
+-palabra:
+-fila:
+-columna:
+-filas_columnas:
+salidas:
+-tablero:*/
+char** agregar_palabra_en_columna(char** tablero, char** palabras,int palabra, int fila, int columna, int filas_columnas){
+
+	int len_palabra=(int)palabras[palabra][0]-48;
+	int pivote_palabra=1;
+
+	for (int f = fila; f < fila+len_palabra; f++)
+	{
+		tablero[f][columna]=palabras[palabra][pivote_palabra];
+		pivote_palabra=pivote_palabra+1;
+	}
+	return tablero;
+}
+
 /*
 entradas:
 -tablero:
 */
-void cargar_palabras_al_tablero(char** *tablero, char nivel, char** *palabras, int n_palabras, int filas_columnas){
+char** cargar_palabras_al_tablero(char** tablero, char nivel, char** palabras, int n_palabras, int filas_columnas){
 	int palabras_insertadas=0;
 	int* reservar=(int*)malloc(n_palabras*sizeof(int));
 	int n_reservar=0;
@@ -315,28 +378,31 @@ void cargar_palabras_al_tablero(char** *tablero, char nivel, char** *palabras, i
 
 	if(nivel=='F'){
 		printf("Palabras de forma horizontal\n");
-		*tablero[0][0]='F';
 		for (int i = 0; i <n_palabras; i++){
-			int posicion = numero_random(filas_columnas, reservar, n_reservar);
-			printf("La palabra %i se alojara en la columna %i \n", i+1, posicion );
-			reservar[i]=posicion;
+			int columna = fila_columna_random(filas_columnas, reservar, n_reservar);
+			int len_palabra=(int)palabras[i][0]-48;
+			int fila = posicion_random(filas_columnas-len_palabra);
+			printf("La palabra[%i] %i se alojara en la columna [%i,%i) \n",len_palabra, i+1, fila, columna );
+			tablero = agregar_palabra_en_columna(tablero,palabras,i,fila, columna, filas_columnas);
+			reservar[i]=columna;
 			n_reservar=n_reservar+1;
 		}
 	}else if(nivel=='M'){
 		printf("Palabras de forma vertical\n");
-		*tablero[0][0]='M';
 		for (int i = 0; i < n_palabras; i++){
-			int posicion = numero_random(filas_columnas, reservar, n_reservar);
-			printf("La palabra %i se alojara en la fila %i \n", i+1, posicion );
-			reservar[i]=posicion;
+			int fila = fila_columna_random(filas_columnas, reservar, n_reservar);
+			int len_palabra=(int)palabras[i][0]-48;
+			int columna = posicion_random(filas_columnas-len_palabra);
+			printf("La palabra[%i] %i se alojara en la fila [%i,%i] \n",len_palabra, i+1, fila, columna );
+			tablero = agregar_palabra_en_fila(tablero,palabras,i,fila, columna, filas_columnas);
+			reservar[i]=fila;
 			n_reservar=n_reservar+1;
 		}
 	}else{
 		printf("Palabras en diagonal\n");
-		*tablero[0][0]='A';
-
 	}
 
+	return tablero;
 }
 /*Inicio del programa*/
 int main()
@@ -397,12 +463,9 @@ int main()
 		}
 		printf("\n");
 	}
-	printf("Antes: \n");
 	imprimir_matriz(tablero, largo);
-	printf("Despues\n");
-	cargar_palabras_al_tablero(&tablero, nivel, &palabras, palabras_a_buscar, largo);
+	tablero=cargar_palabras_al_tablero(tablero, nivel, palabras, palabras_a_buscar, largo);
 	imprimir_matriz(tablero, largo);
-
 	//Libero la memoria solicitada
 	free(tablero);
 	return 0;

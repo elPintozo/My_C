@@ -140,6 +140,7 @@ void solicitar_nivel(char *nivel){
 	}
 	*nivel = teclado;
 }
+
 /*Funcion que agrega una letra a un arreglo que contiene parte de una palabra
 entrada: 
 - palabra: un arreglo que puede o no contener uno o varios caracteres previos
@@ -317,15 +318,16 @@ int posicion_random(int hasta){
 }
 
 /*
+Funcion que inserta una palabra dentro del tablero en alguna fila en particular
 entradas:
--tablero:
--palabras:
--palabra:
--fila:
--columna:
--filas_columnas:
+-tablero:tablero de juego
+-palabras: lista de palabras
+-palabra: numero de la palabra en la lista
+-fila: numero de la fila en donde comenzar a insertar la palabra caracter a caracter
+-columna: numero de la columna en donde comenzar a insertar la palabra caracter a caracter
+-filas_columnas: largo de la matriz
 salidas:
--tablero:*/
+-tablero: tablero con al palabra a agregar ya en ella*/
 char** agregar_palabra_en_fila(char** tablero, char** palabras,int palabra, int fila, int columna, int filas_columnas){
 
 	int len_palabra=(int)palabras[palabra][0]-48;
@@ -338,16 +340,18 @@ char** agregar_palabra_en_fila(char** tablero, char** palabras,int palabra, int 
 	}
 	return tablero;
 }
+
 /*
+Funcion que inserta una palabra dentro del tablero en alguna columna en particular
 entradas:
--tablero:
--palabras:
--palabra:
--fila:
--columna:
--filas_columnas:
+-tablero:tablero de juego
+-palabras: lista de palabras
+-palabra: numero de la palabra en la lista
+-fila: numero de la fila en donde comenzar a insertar la palabra caracter a caracter
+-columna: numero de la columna en donde comenzar a insertar la palabra caracter a caracter
+-filas_columnas: largo de la matriz
 salidas:
--tablero:*/
+-tablero: tablero con al palabra a agregar ya en ella*/
 char** agregar_palabra_en_columna(char** tablero, char** palabras,int palabra, int fila, int columna, int filas_columnas){
 
 	int len_palabra=(int)palabras[palabra][0]-48;
@@ -361,9 +365,34 @@ char** agregar_palabra_en_columna(char** tablero, char** palabras,int palabra, i
 	return tablero;
 }
 
+char** rellenar_tablero(char** tablero, int filas_columnas){
+
+	int min=97; //Letra a en ASCII
+	int max=122; //Letra z en ASCII
+
+	for (int f = 0; f < filas_columnas; f++){
+		for (int c = 0; c < filas_columnas; c++){
+
+			int letra_rand = rand() % (max + 1 - min) + min;
+			char letra = (char)letra_rand;
+
+			if(tablero[f][c]=='-'){
+				tablero[f][c]= letra;
+			}
+		}	
+	}
+	return tablero;
+}
 /*
+Funcion que organiza la insercion de las palabras dentro del table, esto segun el nivel que halla seleccionado el jugador
 entradas:
--tablero:
+-tablero: matriz con el tablero de juego
+-nivel: el el nivel que selecciono el usuario al comenzar el juego
+-palabras: list con las palabras
+-n_palabras: numero de palabras a insertar
+-filas_columnas largo de la matriz
+salidas:
+-tablero: tablero con todas las palabras insertadas
 */
 char** cargar_palabras_al_tablero(char** tablero, char nivel, char** palabras, int n_palabras, int filas_columnas){
 	int palabras_insertadas=0;
@@ -377,23 +406,19 @@ char** cargar_palabras_al_tablero(char** tablero, char nivel, char** palabras, i
 	}
 
 	if(nivel=='F'){
-		printf("Palabras de forma horizontal\n");
 		for (int i = 0; i <n_palabras; i++){
 			int columna = fila_columna_random(filas_columnas, reservar, n_reservar);
 			int len_palabra=(int)palabras[i][0]-48;
 			int fila = posicion_random(filas_columnas-len_palabra);
-			printf("La palabra[%i] %i se alojara en la columna [%i,%i) \n",len_palabra, i+1, fila, columna );
 			tablero = agregar_palabra_en_columna(tablero,palabras,i,fila, columna, filas_columnas);
 			reservar[i]=columna;
 			n_reservar=n_reservar+1;
 		}
 	}else if(nivel=='M'){
-		printf("Palabras de forma vertical\n");
 		for (int i = 0; i < n_palabras; i++){
 			int fila = fila_columna_random(filas_columnas, reservar, n_reservar);
 			int len_palabra=(int)palabras[i][0]-48;
 			int columna = posicion_random(filas_columnas-len_palabra);
-			printf("La palabra[%i] %i se alojara en la fila [%i,%i] \n",len_palabra, i+1, fila, columna );
 			tablero = agregar_palabra_en_fila(tablero,palabras,i,fila, columna, filas_columnas);
 			reservar[i]=fila;
 			n_reservar=n_reservar+1;
@@ -402,8 +427,9 @@ char** cargar_palabras_al_tablero(char** tablero, char nivel, char** palabras, i
 		printf("Palabras en diagonal\n");
 	}
 
-	return tablero;
+	return rellenar_tablero(tablero, filas_columnas);
 }
+
 /*Inicio del programa*/
 int main()
 {
@@ -457,16 +483,17 @@ int main()
 	printf("\nComencemos, hay %i palabras por encontrar\n", palabras_a_buscar);
 	for (int i = 0; i < palabras_a_buscar; ++i){
 		int largo = (int)palabras[i][0]-48 +1;
+		printf("%i - ", i+1);
 		for (int c =1; c < largo; c++)
 		{
 			printf("%c",palabras[i][c] );
 		}
 		printf("\n");
 	}
-	imprimir_matriz(tablero, largo);
 	tablero=cargar_palabras_al_tablero(tablero, nivel, palabras, palabras_a_buscar, largo);
 	imprimir_matriz(tablero, largo);
 	//Libero la memoria solicitada
 	free(tablero);
+
 	return 0;
 }

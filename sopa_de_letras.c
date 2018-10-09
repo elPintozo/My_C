@@ -437,12 +437,25 @@ char** cargar_palabras_al_tablero(char** tablero, char nivel, char** palabras, i
 	return rellenar_tablero(tablero, filas_columnas);
 }
 
-/**/
+/*Funcion que en base a unas coordenadas recorre un tramo en especifico de la matriz con la finalidad de encontrar una palabra ya dada,
+de ser igual el tramo recorrido que la palabra encontrada cambia el contador de palabras por encontrar
+entradas:
+-tablero: matriz de juego
+-palabras: list con las palabras
+-n_palabra_a_buscar: posicion del list de la palabra a buscar
+-f_inicio: Y1
+-c_inicio:X1
+-f_termino:Y2
+-c_termino:X2
+-largo: largo de la matriz
+-estaba_palabra: direccion de memoria en donde se notifica que se encontro una palabra nueva
+salidas:
+-tablero: matriz(se debia rellenar con * donde estaba la palabra encontrada
+*/
 char** encontrar_palabra(char** tablero, char** palabras, int n_palabra_a_buscar, int f_inicio, int c_inicio, int f_termino, int c_termino, int largo, int *estaba_palabra){
-	int largo_palabra=(int)palabras[n_palabra_a_buscar][0]-48;
-	int pivote_palabra=1;
-	int iguales=0;
-
+	int largo_palabra=(int)palabras[n_palabra_a_buscar][0]-48;// obtengo el largo de la palabra a buscar
+	int pivote_palabra=1;//me ayuda a recorer letra por letra la palabra
+	int iguales=0;//me ayuda a contar si la cantidad de caracteres de las letras iguales tanto de la palabra como la matriz es igual
 
 	for (int f = f_inicio; f <= f_termino; f++){
 		for (int c = c_inicio; c <= c_termino; c++){
@@ -535,9 +548,8 @@ int main()
 		imprimir_matriz(tablero, largo);
 
 		int n_palabra_a_buscar=0;
-		int buscar_fila=0;
-		int buscar_columna=0;
 
+		//variables que almacenan las coordenadas de busqueda de la palabra en la matriz
 		int f_inicio=0;
 		int f_termino=0;
 		int c_inicio=0;

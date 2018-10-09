@@ -126,18 +126,18 @@ void solicitar_nivel(char *nivel){
 				nivel_seleccionado=1;
 				break;
 			case 'A':
-				nivel_seleccionado=1;
+				printf("Este nivel aun esta en desarrollo.\n\n");
 				break;
 			case 'a':
 				teclado='A';
-				nivel_seleccionado=1;
+				printf("Este nivel aun esta en desarrollo.\n\n");
 				break;
 
 			default:
 			printf("\nOpcion no valida, vuelve a intentarlo\n\n");
 			break;
 		}
-	}
+	}printf("\n");
 	*nivel = teclado;
 }
 
@@ -365,6 +365,13 @@ char** agregar_palabra_en_columna(char** tablero, char** palabras,int palabra, i
 	return tablero;
 }
 
+/*Funcion que rellena los espacios de la matriz sin las letras de las palabras en ella 
+entradas:
+-tablero: la matriz de juego
+-filas_columnas: el largo de la fila/columna del tablero
+salidas:
+-tablero:matriz con las modificaciones correspondientes
+*/
 char** rellenar_tablero(char** tablero, int filas_columnas){
 
 	int min=97; //Letra a en ASCII
@@ -430,6 +437,34 @@ char** cargar_palabras_al_tablero(char** tablero, char nivel, char** palabras, i
 	return rellenar_tablero(tablero, filas_columnas);
 }
 
+/**/
+char** encontrar_palabra(char** tablero, char** palabras, int n_palabra_a_buscar, int f_inicio, int c_inicio, int f_termino, int c_termino, int largo, int *estaba_palabra){
+	int largo_palabra=(int)palabras[n_palabra_a_buscar][0]-48;
+	int pivote_palabra=1;
+	int iguales=0;
+
+
+	for (int f = f_inicio; f <= f_termino; f++){
+		for (int c = c_inicio; c <= c_termino; c++){
+			if(pivote_palabra<=largo_palabra){
+				if(tablero[f][c]==palabras[n_palabra_a_buscar][pivote_palabra]){
+					iguales=iguales+1;
+					pivote_palabra=pivote_palabra+1;
+				}
+			}
+			else{
+				iguales=iguales-1;
+			}
+		}
+	}
+	/**/
+	if(iguales==largo_palabra){
+		*estaba_palabra=1;
+	}
+	
+	return tablero;
+}
+
 /*Inicio del programa*/
 int main()
 {
@@ -479,21 +514,88 @@ int main()
 		free(tablero);
 		return 0;
 	}
-	
-	printf("\nComencemos, hay %i palabras por encontrar\n", palabras_a_buscar);
-	for (int i = 0; i < palabras_a_buscar; ++i){
-		int largo = (int)palabras[i][0]-48 +1;
-		printf("%i - ", i+1);
-		for (int c =1; c < largo; c++)
-		{
-			printf("%c",palabras[i][c] );
+	//Si la variable termino_juego tiene el mismo valor que palabras_a_buscar has ganado
+	int termino_juego=0;
+	while(termino_juego!=palabras_a_buscar){
+		system("clear");
+		printf("\nComencemos, hay %i de %i palabras por encontrar\n", palabras_a_buscar-termino_juego,palabras_a_buscar);
+		for (int i = 0; i < palabras_a_buscar; ++i){
+			int largo = (int)palabras[i][0]-48 +1;
+			//Si la palabra tiene largo cero, es porque ya fue encontrada
+			if(largo!=1){
+				printf("%i - ", i+1);
+				for (int c =1; c < largo; c++)
+				{
+					printf("%c",palabras[i][c] );
+				}
+				printf("\n");
+			}
+		}printf("\n");
+		tablero=cargar_palabras_al_tablero(tablero, nivel, palabras, palabras_a_buscar, largo);
+		imprimir_matriz(tablero, largo);
+
+		int n_palabra_a_buscar=0;
+		int buscar_fila=0;
+		int buscar_columna=0;
+
+		int f_inicio=0;
+		int f_termino=0;
+		int c_inicio=0;
+		int c_termino=0;
+
+		/*Valido que el numero de la palabra a buscar este dentro de listado*/
+		int n_palabra_valida=0;
+		while(n_palabra_valida==0){
+			printf("\nHas encontrado una palabra?, indica N° de la palabra encontrada:");
+			scanf("%i", &n_palabra_a_buscar);
+			if(n_palabra_a_buscar>0 && n_palabra_a_buscar<=palabras_a_buscar){
+				n_palabra_valida=1;
+			}else{
+				printf("EL numero ingresado no esta dentro de las palabras\n");
+			}
 		}
-		printf("\n");
+		//variable que me ayuda a controlar las variables para encontrar una palabra
+		//mientras no encuentre una palabra seguira pidiendo coordenadas
+		int coordenadas=0;
+		while(coordenadas==0){
+			printf("\nN° de la fila en donde comienza la palabra: ");
+			scanf("%i", &f_inicio);
+			printf("\nN° de la columna en donde comienza la palabra: ");
+			scanf("%i", &c_inicio);
+			printf("\nN° de la fila en donde termina la palabra: ");
+			scanf("%i", &f_termino);
+			printf("\nN° de la columna en donde termina la palabra: ");
+			scanf("%i", &c_termino);
+
+			//En el nivel facil cada palabra esta contenida dentro de una sola columna, por ende de introducir columnas distintas ya no esta ahi
+			//En el nivel medio cada palabra esta contenida dentro de una sola fila, por ende de introducir filas distintas ya no esta ahi
+			if( (c_inicio!=c_termino && nivel=='F') || (f_inicio!=f_termino && nivel=='M')){
+				printf("No esta la palabra en las coordenadas [%i,%i] [%i,%i], vuelve a intentarlo\n", f_inicio, c_inicio,f_termino,c_termino);
+			}else{
+				if(f_inicio>largo || f_termino>largo || c_inicio>largo || c_termino>largo ){
+					printf("Uno de los valores de las coordenadas no es valido\n");
+				}else{
+					/*Si esta variable cambia su valor luego de la ejecucion de la funcion
+					encontrar_palabra, es porque la encontro, por ende la palabra se elimina del listado
+					*/
+					int estaba_palabra=0;
+					tablero =encontrar_palabra(tablero, palabras, n_palabra_a_buscar-1, f_inicio-1, c_inicio-1, f_termino-1, c_termino-1, largo, &estaba_palabra);
+					if(estaba_palabra!=0){
+						estaba_palabra=0;
+						palabras[n_palabra_a_buscar-1][0]=0+'0';
+						termino_juego=termino_juego+1;
+						coordenadas=1;
+					}else{
+						printf("Lo siento la palabra no estaba en esas coordenadas, vuelve a intentarlo.\n");
+					}
+				}
+			}
+		}
 	}
-	tablero=cargar_palabras_al_tablero(tablero, nivel, palabras, palabras_a_buscar, largo);
-	imprimir_matriz(tablero, largo);
+	printf("\n\nHas ganado el juego!!!\n");
 	//Libero la memoria solicitada
 	free(tablero);
 
 	return 0;
+		
 }

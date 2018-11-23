@@ -117,11 +117,58 @@ int** generar_matriz(int dimension){
 			tablero[i][c]=0;
 		}
 	}
-
+	tablero[0][0]=3;
+	tablero[0][1]=1;
+	tablero[1][0]=2;
+	tablero[1][1]=0;
 	return tablero;
 }
+/*
+entradas:
+salidas:
+*/
+ int** actualizar_puzzle(int** tablero_actual, int movimiento, int largo){
+ 	printf("actualizar puzzle\n");
+ 	imprimir_tablero(tablero_actual, largo);
 
+ 	//posicion del cero
+ 	int x_actual=0, y_actual=0, x_new=0, y_new=0;
 
+ 	//valor contenido en donde se pondra el cero
+ 	int trueque;
+
+	for(int f=0 ; f<largo ; f++){
+		for(int c=0 ; c<largo ; c++){
+			int elemento = tablero_actual[f][c];
+			if(elemento==0){
+				x_actual =c;
+				y_actual =f;
+			}
+		}
+	}
+	if(movimiento==1){//arriba
+		x_new = x_actual -1;
+		y_new = y_actual;
+	}else if(movimiento==2){//abajo
+		x_new = x_actual + 1;
+		y_new = y_actual;
+	}else if(movimiento==3){//izquierda
+		y_new = y_actual-1;
+		x_new = x_actual;
+	}else{//derecha
+		y_new = y_actual-1;
+		x_new = x_actual;
+	}
+	printf("posicion actual: (%i,%i) | %i\n", x_actual, y_actual, tablero_actual[x_actual][y_actual]);
+	printf("posicion nueva: (%i,%i) | %i\n", x_new, y_new, tablero_actual[x_new][y_new]);
+	//realizar
+	trueque = tablero_actual[x_new][y_new];
+	tablero_actual[x_new][y_new] = 0;
+	tablero_actual[x_actual][y_actual] =trueque;
+
+	imprimir_tablero(tablero_actual, largo);
+	return tablero_actual;
+ }
 /*
 Funcion que imprime todo un struc con sus "ramas"
 entradas:
@@ -162,8 +209,10 @@ salidas:
 
 */
 int tablero_terminado(int** tabla, int largo){
+	printf("Tablero terminado \n");
 
-	int comparador=1, igualdad=0;
+	int comparador=1;
+	int igualdad=0;
 
 	for(int f=0 ; f<largo ; f++){
 		for(int c=0 ; c<largo ; c++){
@@ -191,14 +240,34 @@ int tablero_terminado(int** tabla, int largo){
 	return igualdad;
 }
 
+/*
+entradas:
+- tabla:
+- movimiento:
+- movimiento_bloqueado:
+- largo:
+salidas:
+*/
 int puedo_mover(int** tabla, int movimiento, int movimiento_bloqueado, int largo){
-
+	printf("Puedo mover: %i? |%i \n",movimiento, movimiento_bloqueado);
 	//Los movimientos son:
 	//1 -> arriba
 	//2 -> abajo
 	//3 -> izquierda
 	//4 -> derecha
-	int mover=1;
+
+	if(movimiento==1 && movimiento_bloqueado==2){
+		return 0;//No
+	}
+	if(movimiento==2 && movimiento_bloqueado==1){
+		return 0;//No
+	}
+	if(movimiento==3 && movimiento_bloqueado==4){
+		return 0;//No
+	}
+	if(movimiento==4 && movimiento_bloqueado==3){
+		return 0;//No
+	}
 
 	for(int f=0 ; f<largo ; f++){
 		for(int c=0 ; c<largo ; c++){
@@ -206,39 +275,41 @@ int puedo_mover(int** tabla, int movimiento, int movimiento_bloqueado, int largo
 			if(elemento==0){
 
 				if(movimiento==1){//intenta subir
-					printf("movimiento(1): %i|%i\n",c-1,c);
-					if((c-1)>=0){
-						mover=0;
+					printf("movimiento(1): %i|%i\n",f-1,f);
+					if((f-1)<0){
+						return 0;//No
 					}
 				}else if(movimiento==2){//intenta bajar
-					printf("movimiento(2): %i|%i\n",c+1,c);
-					if((c+1)<largo){
-						mover=0;
+					printf("movimiento(2): %i|%i\n",f+1,f);
+					if((f+1)>largo){
+						return 0;//No
 					}
 				}else if(movimiento==3){//intenta izquierda
-					printf("movimiento(3): %i|%i\n",f-1,f);
-					if((f-1)>=0){
-						mover=0;
+					printf("movimiento(3): %i|%i\n",c-1,c);
+					if((c-1)<0){
+						return 0;//No
 					}
 				}else{//intenta derecha
-					printf("movimiento(4): %i|%i\n",f+1,f);
-					if((f+1)<largo){
-						mover=0;
+					printf("movimiento(4): %i|%i\n",c+1,c);
+					if((c+1)>largo){
+						return 0;//No
 					}
 				}
 
 			}
-		}
-		printf("\n");	
+		}	
 	}
 
-	return igualdad;
+	return 1;//Si
 }
+
 /*
 entradas:
+- actual_tablero:
 salidas:
 */
 Tablero *generar_traza(Tablero *actual_tablero){
+	printf("Generar traza\n");
 
 	if(tablero_terminado(actual_tablero->mesa_juego,actual_tablero->largo)==1){
 		printf("Tablero ordenado %i \n", actual_tablero->ID);
@@ -246,7 +317,7 @@ Tablero *generar_traza(Tablero *actual_tablero){
 	}
 	else{
 		/*mover arriba - bloquear movimiento abajo*/
-		if(puedo_mover(actual_tablero->mesa_juego,actual_tablero->largo,1,new_tablero->movimiento_bloqueado, actual_tablero->largo)==1){
+		if(puedo_mover(actual_tablero->mesa_juego, 1, actual_tablero->movimiento_bloqueado, actual_tablero->largo)==1){
 
 			Tablero *new_tablero;
 			new_tablero = (Tablero*)malloc(sizeof(Tablero));
@@ -256,7 +327,7 @@ Tablero *generar_traza(Tablero *actual_tablero){
 			new_tablero->movimiento_bloqueado = 2;
 
 			new_tablero->largo = actual_tablero->largo;
-			new_tablero->mesa_juego = tablero;
+			new_tablero->mesa_juego = actualizar_puzzle(actual_tablero->mesa_juego, 1, actual_tablero->largo);
 
 			new_tablero->anterior = actual_tablero;//actualizar
 			new_tablero->arriba = NULL;
@@ -265,11 +336,11 @@ Tablero *generar_traza(Tablero *actual_tablero){
 			new_tablero->derecha = NULL;
 			
 			actual_tablero->arriba = new_tablero;
-
-			return actual_tablero->arriba;
+			printf("Padre: %i, Hijo: %i\n", actual_tablero->ID, new_tablero->ID);
+			return generar_traza(actual_tablero->arriba);
 		}
 		/*mover abajo - bloquear movimiento arriba*/
-		if(puedo_mover(actual_tablero->mesa_juego, actual_tablero->largo, 2, new_tablero->movimiento_bloqueado, actual_tablero->largo)==1){
+		if(puedo_mover(actual_tablero->mesa_juego, 2, actual_tablero->movimiento_bloqueado, actual_tablero->largo)==1){
 
 			Tablero *new_tablero;
 			new_tablero = (Tablero*)malloc(sizeof(Tablero));
@@ -279,7 +350,7 @@ Tablero *generar_traza(Tablero *actual_tablero){
 			new_tablero->movimiento_bloqueado = 1;
 
 			new_tablero->largo = actual_tablero->largo;
-			new_tablero->mesa_juego = tablero;//actualizar
+			new_tablero->mesa_juego = actualizar_puzzle(actual_tablero->mesa_juego, 2, actual_tablero->largo);//actualizar
 
 			new_tablero->anterior = actual_tablero;
 			new_tablero->arriba = NULL;
@@ -288,11 +359,11 @@ Tablero *generar_traza(Tablero *actual_tablero){
 			new_tablero->derecha = NULL;
 			
 			actual_tablero->abajo = new_tablero;
-
-			return actual_tablero->abajo;
+			printf("Padre: %i, Hijo: %i\n", actual_tablero->ID, new_tablero->ID);
+			return generar_traza(actual_tablero->abajo);
 		}
 		/*mover izquierda - bloquear movimiento derecha*/
-		if(puedo_mover(actual_tablero->mesa_juego, actual_tablero->largo, 3, new_tablero->movimiento_bloqueado, actual_tablero->largo)==1){
+		if(puedo_mover(actual_tablero->mesa_juego, 3, actual_tablero->movimiento_bloqueado, actual_tablero->largo)==1){
 
 			Tablero *new_tablero;
 			new_tablero = (Tablero*)malloc(sizeof(Tablero));
@@ -302,7 +373,7 @@ Tablero *generar_traza(Tablero *actual_tablero){
 			new_tablero->movimiento_bloqueado = 4;
 
 			new_tablero->largo = actual_tablero->largo;
-			new_tablero->mesa_juego = tablero;//actualizar
+			new_tablero->mesa_juego = actualizar_puzzle(actual_tablero->mesa_juego, 3, actual_tablero->largo);//actualizar
 
 			new_tablero->anterior = actual_tablero;
 			new_tablero->arriba = NULL;
@@ -311,11 +382,11 @@ Tablero *generar_traza(Tablero *actual_tablero){
 			new_tablero->derecha = NULL;
 			
 			actual_tablero->izquierda = new_tablero;
-
-			return actual_tablero->izquierda;
+			printf("Padre: %i, Hijo: %i\n", actual_tablero->ID, new_tablero->ID);
+			return generar_traza(actual_tablero->izquierda);
 		}
 		/*mover derecha - bloquear movimiento izquierda*/
-		if(puedo_mover(actual_tablero->mesa_juego, actual_tablero->largo, 4, new_tablero->movimiento_bloqueado, actual_tablero->largo)==1){
+		if(puedo_mover(actual_tablero->mesa_juego, 4, actual_tablero->movimiento_bloqueado, actual_tablero->largo)==1){
 
 			Tablero *new_tablero;
 			new_tablero = (Tablero*)malloc(sizeof(Tablero));
@@ -325,7 +396,7 @@ Tablero *generar_traza(Tablero *actual_tablero){
 			new_tablero->movimiento_bloqueado = 3;
 
 			new_tablero->largo = actual_tablero->largo;
-			new_tablero->mesa_juego = tablero;//actualizar
+			new_tablero->mesa_juego = actualizar_puzzle(actual_tablero->mesa_juego, 4, actual_tablero->largo);//actualizar
 
 			new_tablero->anterior = actual_tablero;
 			new_tablero->arriba = NULL;
@@ -334,8 +405,8 @@ Tablero *generar_traza(Tablero *actual_tablero){
 			new_tablero->derecha = NULL;
 			
 			actual_tablero->derecha = new_tablero;
-
-			return actual_tablero->derecha;
+			printf("Padre: %i, Hijo: %i\n", actual_tablero->ID, new_tablero->ID);
+			return generar_traza(actual_tablero->derecha);
 		}
 		return actual_tablero;
 	}
@@ -378,5 +449,6 @@ int main(){
 	
 	mi_tablero=generar_traza(mi_tablero);
 
+	imprimir_tablero(mi_tablero->mesa_juego, largo);
 	return 0;
 }

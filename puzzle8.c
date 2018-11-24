@@ -141,8 +141,9 @@ salidas:
 		for(int c=0 ; c<largo ; c++){
 			int elemento = tablero_actual[f][c];
 			if(elemento==0){
-				x_actual =c;
-				y_actual =f;
+				x_actual =f;
+				y_actual =c;
+				printf("encontrado: %i (%i,%i)\n", elemento,f,c);
 			}
 		}
 	}
@@ -156,7 +157,7 @@ salidas:
 		y_new = y_actual-1;
 		x_new = x_actual;
 	}else{//derecha
-		y_new = y_actual-1;
+		y_new = y_actual+1;
 		x_new = x_actual;
 	}
 	printf("posicion actual: (%i,%i) | %i\n", x_actual, y_actual, tablero_actual[x_actual][y_actual]);
@@ -181,17 +182,11 @@ void imprimir_struc(Tablero *tablero){
 	while(sig!=NULL){
 		printf("----Struct[ID]: %i\n", sig->ID);
 		printf("----Struct[movimiento_realizado]: %i\n", sig->movimiento_realizado);
-		printf("----Struct[movimiento_bloqueado]: %i\n", sig->movimiento_bloqueado);
-		printf("----Struct[Padre]: %d\n\n", sig->anterior);
+		printf("----Struct[Padre]: %d\n\n", sig->anterior->ID);
 
 		imprimir_tablero(sig->mesa_juego, sig->largo);
 
-		if (sig->anterior != NULL){sig = sig->anterior;}
-		else if (sig->arriba != NULL){sig = sig->arriba;}
-		else if (sig->abajo != NULL){sig = sig->abajo;}
-		else if (sig->izquierda != NULL){sig = sig->izquierda;}
-		else if (sig->derecha != NULL){sig = sig->derecha;}
-		else {sig=NULL;}
+		sig = sig->anterior;
 		
 		printf("----\n");
 	}
@@ -209,10 +204,9 @@ salidas:
 
 */
 int tablero_terminado(int** tabla, int largo){
-	printf("Tablero terminado \n");
 
 	int comparador=1;
-	int igualdad=0;
+	int igualdad=1;
 
 	for(int f=0 ; f<largo ; f++){
 		for(int c=0 ; c<largo ; c++){
@@ -226,17 +220,14 @@ int tablero_terminado(int** tabla, int largo){
 				}else{
 					igualdad=0;
 				}
-			}else{
-				igualdad=0;
 			}
 
-
-			printf("[%i,%i] (%i|%i){%i} ", f, c, elemento, igualdad, comparador);
+			printf(" comparador [%i,%i] (%i|%i){%i} ", f, c, elemento, igualdad, comparador);
 			comparador=comparador+1;
 		}
 		printf("\n");	
 	}
-
+	printf("Tablero terminado: %i \n", igualdad);
 	return igualdad;
 }
 
@@ -256,16 +247,7 @@ int puedo_mover(int** tabla, int movimiento, int movimiento_bloqueado, int largo
 	//3 -> izquierda
 	//4 -> derecha
 
-	if(movimiento==1 && movimiento_bloqueado==2){
-		return 0;//No
-	}
-	if(movimiento==2 && movimiento_bloqueado==1){
-		return 0;//No
-	}
-	if(movimiento==3 && movimiento_bloqueado==4){
-		return 0;//No
-	}
-	if(movimiento==4 && movimiento_bloqueado==3){
+	if(movimiento==movimiento_bloqueado){
 		return 0;//No
 	}
 
@@ -275,23 +257,23 @@ int puedo_mover(int** tabla, int movimiento, int movimiento_bloqueado, int largo
 			if(elemento==0){
 
 				if(movimiento==1){//intenta subir
-					printf("movimiento(1): %i|%i\n",f-1,f);
+					printf("movimiento(1): (%i,%i) %i|%i\n",f,c,f-1,f);
 					if((f-1)<0){
 						return 0;//No
 					}
 				}else if(movimiento==2){//intenta bajar
-					printf("movimiento(2): %i|%i\n",f+1,f);
-					if((f+1)>largo){
+					printf("movimiento(2): (%i,%i) %i|%i\n",f,c,f+1,f);
+					if((f+1)==largo){
 						return 0;//No
 					}
 				}else if(movimiento==3){//intenta izquierda
-					printf("movimiento(3): %i|%i\n",c-1,c);
+					printf("movimiento(3): (%i,%i) %i|%i\n",f,c,c-1,c);
 					if((c-1)<0){
 						return 0;//No
 					}
 				}else{//intenta derecha
-					printf("movimiento(4): %i|%i\n",c+1,c);
-					if((c+1)>largo){
+					printf("movimiento(4): (%i,%i) %i|%i\n",f,c,c+1,c);
+					if((c+1)==largo){
 						return 0;//No
 					}
 				}
@@ -313,12 +295,11 @@ Tablero *generar_traza(Tablero *actual_tablero){
 
 	if(tablero_terminado(actual_tablero->mesa_juego,actual_tablero->largo)==1){
 		printf("Tablero ordenado %i \n", actual_tablero->ID);
-		return actual_tablero;
 	}
 	else{
 		/*mover arriba - bloquear movimiento abajo*/
 		if(puedo_mover(actual_tablero->mesa_juego, 1, actual_tablero->movimiento_bloqueado, actual_tablero->largo)==1){
-
+			printf("Puede mover 1 ID(%i)\n", actual_tablero->ID);
 			Tablero *new_tablero;
 			new_tablero = (Tablero*)malloc(sizeof(Tablero));
 			ID = ID + 1;
@@ -341,7 +322,7 @@ Tablero *generar_traza(Tablero *actual_tablero){
 		}
 		/*mover abajo - bloquear movimiento arriba*/
 		if(puedo_mover(actual_tablero->mesa_juego, 2, actual_tablero->movimiento_bloqueado, actual_tablero->largo)==1){
-
+			printf("Puede mover 2 ID(%i)\n", actual_tablero->ID);
 			Tablero *new_tablero;
 			new_tablero = (Tablero*)malloc(sizeof(Tablero));
 			ID = ID + 1;
@@ -364,7 +345,7 @@ Tablero *generar_traza(Tablero *actual_tablero){
 		}
 		/*mover izquierda - bloquear movimiento derecha*/
 		if(puedo_mover(actual_tablero->mesa_juego, 3, actual_tablero->movimiento_bloqueado, actual_tablero->largo)==1){
-
+			printf("Puede mover 3 ID(%i)\n", actual_tablero->ID);
 			Tablero *new_tablero;
 			new_tablero = (Tablero*)malloc(sizeof(Tablero));
 			ID = ID + 1;
@@ -387,7 +368,7 @@ Tablero *generar_traza(Tablero *actual_tablero){
 		}
 		/*mover derecha - bloquear movimiento izquierda*/
 		if(puedo_mover(actual_tablero->mesa_juego, 4, actual_tablero->movimiento_bloqueado, actual_tablero->largo)==1){
-
+			printf("Puede mover 3 ID(%i)\n", actual_tablero->ID);
 			Tablero *new_tablero;
 			new_tablero = (Tablero*)malloc(sizeof(Tablero));
 			ID = ID + 1;
@@ -410,6 +391,7 @@ Tablero *generar_traza(Tablero *actual_tablero){
 		}
 		return actual_tablero;
 	}
+	return actual_tablero;
 }
 
 int main(){
@@ -448,7 +430,8 @@ int main(){
 	mi_tablero->derecha = NULL;
 	
 	mi_tablero=generar_traza(mi_tablero);
-
-	imprimir_tablero(mi_tablero->mesa_juego, largo);
+	printf("%i--------\n", mi_tablero->ID);
+	imprimir_struc(mi_tablero);
+	
 	return 0;
 }

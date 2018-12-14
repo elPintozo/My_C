@@ -2,6 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+/*
+Funcion que convierte una variable tipo char en int
+entradas:
+- c: variable de tipo char que tiene contiene un numero
+salidas:
+- retorna una variable de tipo int
+*/
 int char_to_int(char c){
 	return (int)c-48;
 }
@@ -22,6 +29,13 @@ void imprimir_combinaciones(char** combinaciones, int largo){
 		printf("\n");
 	}
 }
+/*Funcion que imprime por terminal la lista con las combinaciones posibles y señalando
+cual ingreso el usuario que era correcta
+entradas:
+- combinaciones: una matriz con la informacion de la sopa de letras 
+- largo: cantidad de combinaciones existentes
+salida: void
+*/
 void imprimir_combinaciones_y_encontrada(char** combinaciones, int largo, char* password){
 	/*Funcion que nos ayuda a listar los elemenos de una lista,
 	mas el numero de la fila en la que se encuentra*/
@@ -49,6 +63,15 @@ void imprimir_combinaciones_y_encontrada(char** combinaciones, int largo, char* 
 		printf("\n");
 	}
 }
+/*
+funcion que recibe un arreglo con una combinacion de cinco char
+y los imprime por pantalla
+entradas:
+- combinacion: arreglo con cinco chard
+- numero: numero de la combinacion
+salidas:
+salida: void
+*/
 void imprimir_combinacion(char* combinacion, int numero){
 	printf("%i |", numero);
 	for (int columna = 0; columna < 5; columna++){
@@ -113,23 +136,14 @@ char* crear_combinacion(int largo, int combinacion){
 	}
 	return new_combinacion;
 }
-
-/*Funcion que  solicita al jugador la clave
-entrada: 
-- largo: direccion de memoria
-salida: void
-*/
-void solicitar_clave(char *largo){
-	/*Se solicita y valida que el largo cumpla con los requisitos del juego*/
-	printf("Ingrese la clave(debe tener 5 digitos): ");
-	scanf("%s",largo);
-	printf("La clave ingresada: %s\n", largo);
-}
-
 /*
 Hay 'A' pares de numeros consecutivos que suman 'B'
 entrada: 
+- combinacion: arreglo con la combinacion
+- A: -
+- B: -
 salida:
+- 0: para false | 1 para true
 */
 int primer_filtro(char* combinacion, int A, int B){
 
@@ -151,7 +165,10 @@ int primer_filtro(char* combinacion, int A, int B){
 /*
 Al menos 'C' numeros son par
 entrada: 
+- combinacion: arreglo con la combinacion
+- C: - 
 salida:
+- 0: para false | 1 para true
 */
 int segundo_filtro(char* combinacion, int C){
 	int cantidad_necesaria=C;
@@ -171,7 +188,10 @@ int segundo_filtro(char* combinacion, int C){
 /*
 Hay exactamente 'D' numeros primos
 entrada: 
+- combinacion: arreglo con la combinacion
+- D :-
 salida:
+- 0: para false | 1 para true
 */
 int tercer_filtro(char* combinacion, int D){
 	int cantidad_necesaria=D;
@@ -200,7 +220,9 @@ int tercer_filtro(char* combinacion, int D){
 /*
 Hay 'E' pares de numeros seguidos en la secuencia que son consecutivos
 entrada: 
+- combinacion: arreglo con la combinacion
 salida:
+- 0: para false | 1 para true
 */
 int cuarto_filtro(char* combinacion, int E){
 
@@ -225,7 +247,7 @@ int cuarto_filtro(char* combinacion, int E){
 		return 0;
 	}
 }
-
+/*Programa principal*/
 int main(){
 
 	int A=1;  //Hay 'A' pares de numeros consecutivos que suman 'B'
@@ -251,33 +273,18 @@ int main(){
 
 		if(contador>=0 && contador<10 ){
 			combinacion = crear_combinacion(1, contador);
-			//combinaciones_encontradas=combinaciones_encontradas+1;
-			//todas_las_combinaciones = agregar_combinacion(combinaciones_encontradas, todas_las_combinaciones, combinacion);
-			//printf(" combinacion de 1 cifra\n");
 		}
 		if(contador>=10 && contador<100){
 			combinacion = crear_combinacion(2, contador);
-			//combinaciones_encontradas=combinaciones_encontradas+1;
-			//todas_las_combinaciones = agregar_combinacion(combinaciones_encontradas, todas_las_combinaciones, combinacion);
-			//printf(" combinacion de 2 cifra\n");
 		}
 		if(contador>=100 && contador<1000){
 			combinacion = crear_combinacion(3, contador);
-			//combinaciones_encontradas=combinaciones_encontradas+1;
-			//todas_las_combinaciones = agregar_combinacion(combinaciones_encontradas, todas_las_combinaciones, combinacion);
-			//printf(" combinacion de 3 cifra\n");
 		}
 		if(contador>=1000 && contador<10000){
 			combinacion = crear_combinacion(4, contador);
-			//combinaciones_encontradas=combinaciones_encontradas+1;
-			//todas_las_combinaciones = agregar_combinacion(combinaciones_encontradas, todas_las_combinaciones, combinacion);
-			//printf(" combinacion de 4 cifra\n");
 		}
 		if(contador>=10000 && contador<100000){
 			combinacion = crear_combinacion(5, contador);
-			//combinaciones_encontradas=combinaciones_encontradas+1;
-			//todas_las_combinaciones = agregar_combinacion(combinaciones_encontradas, todas_las_combinaciones, combinacion);
-			//printf(" combinacion de 5 cifra\n");
 		}
 		contador=contador+1;
 
@@ -289,7 +296,6 @@ int main(){
 					filtro3_encontradas=filtro3_encontradas+1;
 					if(cuarto_filtro(combinacion, E)==1){
 						filtro4_encontradas=filtro4_encontradas+1;
-						//imprimir_combinacion(combinacion, filtro4_encontradas);
 						todas_las_combinaciones = agregar_combinacion(filtro4_encontradas, todas_las_combinaciones, combinacion);
 					}
 				}
@@ -309,12 +315,12 @@ int main(){
 	printf("(En caso de ser un numero par, la mayor de las del medio)\n\n\n");
 	
 
-	printf("Resumen:\n");
-	printf("Total: %i\n", combinaciones_encontradas);
-	printf("Filtro 1: %i\n", filtro1_encontradas);
-	printf("Filtro 2: %i\n", filtro2_encontradas);
-	printf("Filtro 3: %i\n", filtro3_encontradas);
-	printf("Filtro 4: %i\n", filtro4_encontradas);
+	//printf("Resumen:\n");
+	//printf("Total: %i\n", combinaciones_encontradas);
+	//printf("Filtro 1: %i\n", filtro1_encontradas);
+	//printf("Filtro 2: %i\n", filtro2_encontradas);
+	//printf("Filtro 3: %i\n", filtro3_encontradas);
+	//printf("Filtro 4: %i\n", filtro4_encontradas);
 
 	int intento=0;
 	int ganador=0;
@@ -362,6 +368,6 @@ int main(){
 	}else{
 		imprimir_combinaciones(todas_las_combinaciones, filtro4_encontradas);
 	}
-	//free(todas_las_combinaciones);
+
 	return 0;
 }

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 int char_to_int(char c){
 	return (int)c-48;
@@ -21,7 +22,33 @@ void imprimir_combinaciones(char** combinaciones, int largo){
 		printf("\n");
 	}
 }
-
+void imprimir_combinaciones_y_encontrada(char** combinaciones, int largo, char* password){
+	/*Funcion que nos ayuda a listar los elemenos de una lista,
+	mas el numero de la fila en la que se encuentra*/
+	for (int fila = 0; fila < largo; fila++){
+		int indicador=0;
+		if(combinaciones[fila][0]==password[0]){
+			if(combinaciones[fila][1]==password[1]){
+				if(combinaciones[fila][2]==password[2]){
+					if(combinaciones[fila][3]==password[3]){
+						if(combinaciones[fila][4]==password[4]){
+							indicador=1;
+						}
+					}
+				}
+			}
+		}
+		if(indicador==1){
+			printf("%i| --->", fila+1);
+		}else{
+			printf("%i| ", fila+1);
+		}
+		for (int columna = 0; columna < 5; columna++){
+			printf("%c ", combinaciones[fila][columna]);
+		}
+		printf("\n");
+	}
+}
 void imprimir_combinacion(char* combinacion, int numero){
 	printf("%i |", numero);
 	for (int columna = 0; columna < 5; columna++){
@@ -92,14 +119,11 @@ entrada:
 - largo: direccion de memoria
 salida: void
 */
-void solicitar_clave(int *largo){
+void solicitar_clave(char *largo){
 	/*Se solicita y valida que el largo cumpla con los requisitos del juego*/
-	int dimension=0;
-	while(dimension<11111 || dimension>100000){
-		printf("Ingrese la clave(debe tener 5 digitos): ");
-		scanf("%i",&dimension);
-	}printf("\n");
-	*largo=dimension;
+	printf("Ingrese la clave(debe tener 5 digitos): ");
+	scanf("%s",largo);
+	printf("La clave ingresada: %s\n", largo);
 }
 
 /*
@@ -219,7 +243,7 @@ int main(){
 	int filtro4_encontradas=0;
 
 	int contador=0;
-	int password=0;
+	char password[1000];
 
 
 	while(contador<100000){
@@ -227,31 +251,31 @@ int main(){
 
 		if(contador>=0 && contador<10 ){
 			combinacion = crear_combinacion(1, contador);
-			combinaciones_encontradas=combinaciones_encontradas+1;
+			//combinaciones_encontradas=combinaciones_encontradas+1;
 			//todas_las_combinaciones = agregar_combinacion(combinaciones_encontradas, todas_las_combinaciones, combinacion);
 			//printf(" combinacion de 1 cifra\n");
 		}
 		if(contador>=10 && contador<100){
 			combinacion = crear_combinacion(2, contador);
-			combinaciones_encontradas=combinaciones_encontradas+1;
+			//combinaciones_encontradas=combinaciones_encontradas+1;
 			//todas_las_combinaciones = agregar_combinacion(combinaciones_encontradas, todas_las_combinaciones, combinacion);
 			//printf(" combinacion de 2 cifra\n");
 		}
 		if(contador>=100 && contador<1000){
 			combinacion = crear_combinacion(3, contador);
-			combinaciones_encontradas=combinaciones_encontradas+1;
+			//combinaciones_encontradas=combinaciones_encontradas+1;
 			//todas_las_combinaciones = agregar_combinacion(combinaciones_encontradas, todas_las_combinaciones, combinacion);
 			//printf(" combinacion de 3 cifra\n");
 		}
 		if(contador>=1000 && contador<10000){
 			combinacion = crear_combinacion(4, contador);
-			combinaciones_encontradas=combinaciones_encontradas+1;
+			//combinaciones_encontradas=combinaciones_encontradas+1;
 			//todas_las_combinaciones = agregar_combinacion(combinaciones_encontradas, todas_las_combinaciones, combinacion);
 			//printf(" combinacion de 4 cifra\n");
 		}
 		if(contador>=10000 && contador<100000){
 			combinacion = crear_combinacion(5, contador);
-			combinaciones_encontradas=combinaciones_encontradas+1;
+			//combinaciones_encontradas=combinaciones_encontradas+1;
 			//todas_las_combinaciones = agregar_combinacion(combinaciones_encontradas, todas_las_combinaciones, combinacion);
 			//printf(" combinacion de 5 cifra\n");
 		}
@@ -265,9 +289,8 @@ int main(){
 					filtro3_encontradas=filtro3_encontradas+1;
 					if(cuarto_filtro(combinacion, E)==1){
 						filtro4_encontradas=filtro4_encontradas+1;
-
-						imprimir_combinacion(combinacion, filtro4_encontradas);
-						//todas_las_combinaciones = agregar_combinacion(combinaciones_encontradas, todas_las_combinaciones, combinacion);
+						//imprimir_combinacion(combinacion, filtro4_encontradas);
+						todas_las_combinaciones = agregar_combinacion(filtro4_encontradas, todas_las_combinaciones, combinacion);
 					}
 				}
 			}
@@ -293,7 +316,52 @@ int main(){
 	printf("Filtro 3: %i\n", filtro3_encontradas);
 	printf("Filtro 4: %i\n", filtro4_encontradas);
 
-	//solicitar_clave(&password);
+	int intento=0;
+	int ganador=0;
+
+	while(intento==0){
+
+		int largo_password=0;
+		while(largo_password!=5){
+			printf("Ingrese la clave(debe tener 5 digitos): ");
+			scanf("%s",password );
+			largo_password=(int)strlen(password);
+		}
+		ganador=0;
+
+		for(int x=0 ; x<filtro4_encontradas ; x++){
+			if(todas_las_combinaciones[x][0]==password[0]){
+				if(todas_las_combinaciones[x][1]==password[1]){
+					if(todas_las_combinaciones[x][2]==password[2]){
+						if(todas_las_combinaciones[x][3]==password[3]){
+							if(todas_las_combinaciones[x][4]==password[4]){
+								ganador=1;
+							}
+						}
+					}
+				}
+			}
+		}
+		if(ganador==1){
+			printf("\n\n-- Has adivinado la clave. --\n");
+			intento=1;
+		}else{
+			printf("\n\n-- No has adivinado la clave. --\n");
+			int reintentar=0;
+			while(reintentar==0){
+				printf("1.- Reintentar \n");
+				printf("2.- Salir \n");
+				printf("Ingresar opcion:");
+				scanf("%i",&reintentar);
+				if(reintentar==2){intento=1;}
+			}
+		}
+	}
+	if(ganador==1){
+		imprimir_combinaciones_y_encontrada(todas_las_combinaciones, filtro4_encontradas, password);
+	}else{
+		imprimir_combinaciones(todas_las_combinaciones, filtro4_encontradas);
+	}
 	//free(todas_las_combinaciones);
 	return 0;
 }
